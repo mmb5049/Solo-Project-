@@ -11,7 +11,11 @@ public class PlayerMovement : MonoBehaviour
     public float movementSpeed = 10f;
     public float jumpForce = 30f;
     public Vector2 moveDirection = new Vector2(0, 1);
+    public bool canJump;
 
+    public LayerMask groundLayer; 
+    public float groundCheckDistance = 1f;
+    public RaycastHit terrainHit;
     void Start()
     {
         
@@ -26,14 +30,26 @@ public class PlayerMovement : MonoBehaviour
     {
         // Continuous movement based on input
         rb.velocity = new Vector2(moveDirection.x * movementSpeed, rb.velocity.y);
+
+        if (Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, groundLayer))
+        {
+            canJump = true;
+        }
+        else
+        {
+            canJump = false;
+        }
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started)
         {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            Debug.Log("jump");
+            if(canJump)
+            {
+                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            }
+            
         }
     }
 
@@ -49,5 +65,12 @@ public class PlayerMovement : MonoBehaviour
             // Stop movement when input is canceled
             moveDirection = Vector2.zero;
         }
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        // Visualize the raycast in the scene view
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
     }
 }
