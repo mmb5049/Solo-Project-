@@ -16,6 +16,7 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer; 
     public float groundCheckDistance = 1f;
     public RaycastHit terrainHit;
+    private bool faceLeft = false;
     void Start()
     {
         
@@ -38,6 +39,18 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             canJump = false;
+        }
+
+        if (!canJump)
+        {
+            if(moveDirection.x >= 0) 
+            {
+                rb.rotation -= 3.0f;
+            }
+            else
+            {
+                rb.rotation += 3.0f;
+            }
         }
     }
 
