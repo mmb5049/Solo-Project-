@@ -9,14 +9,20 @@ public class PlayerMovement : MonoBehaviour
     // Start is called before the first frame update
     public Rigidbody2D rb;
     public float movementSpeed = 10f;
-    public float jumpForce = 30f;
+    public float maxJumpForce = 30f;
+    public float minJumpForce = 10f; // Force for a small hop
     public Vector2 moveDirection = new Vector2(0, 1);
     public bool canJump;
 
     public LayerMask groundLayer; 
     public float groundCheckDistance = 1f;
     public RaycastHit terrainHit;
-    private bool faceLeft = false;
+
+    private bool isJumping = false;
+    public float jumpPressDuration = 0f;
+    public float maxJumpDuration = 3f;
+
+
     void Start()
     {
         
@@ -52,17 +58,36 @@ public class PlayerMovement : MonoBehaviour
                 rb.rotation += 3.0f;
             }
         }
+
+        // Increment jumpPressDuration if the player is holding the jump button
+        if (isJumping)
+        {
+            jumpPressDuration += Time.deltaTime;
+
+            if (jumpPressDuration > maxJumpDuration)
+            {
+                jumpPressDuration = maxJumpDuration;
+                isJumping = false; // End jumping when the max duration is reached
+            }
+
+            // Apply dynamic jump force
+            float jumpForce = Mathf.Lerp(minJumpForce, maxJumpForce, jumpPressDuration / maxJumpDuration);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Started)
+        if (context.phase == InputActionPhase.Started && canJump)
         {
-            if(canJump)
-            {
-                rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            }
-            
+            isJumping = true;
+            jumpPressDuration = 0f; // Reset duration
+            rb.velocity = new Vector2(rb.velocity.x, 0); // Reset vertical velocity for consistent jumps
+        }
+
+        if (context.phase == InputActionPhase.Canceled)
+        {
+            isJumping = false; // Stop jumping when the button is released
         }
     }
 
