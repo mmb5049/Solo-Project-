@@ -1,11 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 
 public class PlayerMovement : MonoBehaviour
 {
+    public enum State
+    {
+        FaceLeft,
+        FaceRight
+    }
+
     // Start is called before the first frame update
     public Rigidbody2D rb;
     public float movementSpeed = 10f;
@@ -15,7 +22,7 @@ public class PlayerMovement : MonoBehaviour
     public bool canJump;
 
     public LayerMask groundLayer; 
-    public float groundCheckDistance = 1f;
+    public float groundCheckDistance = 2f;
     public RaycastHit terrainHit;
 
     private bool isJumping = false;
@@ -23,9 +30,13 @@ public class PlayerMovement : MonoBehaviour
     public float maxJumpDuration = 3f;
 
 
+    public State states;
+
+
     void Start()
     {
-        
+        states = State.FaceRight;
+
     }
 
     // Update is called once per frame
@@ -47,17 +58,6 @@ public class PlayerMovement : MonoBehaviour
             canJump = false;
         }
 
-        if (!canJump)
-        {
-            if(moveDirection.x >= 0) 
-            {
-                rb.rotation -= 3.0f;
-            }
-            else
-            {
-                rb.rotation += 3.0f;
-            }
-        }
 
         // Increment jumpPressDuration if the player is holding the jump button
         if (isJumping)
@@ -73,6 +73,17 @@ public class PlayerMovement : MonoBehaviour
             // Apply dynamic jump force
             float jumpForce = Mathf.Lerp(minJumpForce, maxJumpForce, jumpPressDuration / maxJumpDuration);
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        }
+
+        if (moveDirection.x > 0 && states != State.FaceRight)
+        {
+            Flip();
+            states = State.FaceRight;
+        }
+        else if (moveDirection.x < 0 && states != State.FaceLeft)
+        {
+            Flip();
+            states = State.FaceLeft;
         }
     }
 
@@ -110,5 +121,12 @@ public class PlayerMovement : MonoBehaviour
         // Visualize the raycast in the scene view
         Gizmos.color = Color.red;
         Gizmos.DrawLine(transform.position, transform.position + Vector3.down * groundCheckDistance);
+    }
+
+    void Flip()
+    {
+        Vector3 currentScale = gameObject.transform.localScale;
+        currentScale.x *= -1;
+        gameObject.transform.localScale = currentScale;
     }
 }
