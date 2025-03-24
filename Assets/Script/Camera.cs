@@ -7,6 +7,7 @@ public class Camera : MonoBehaviour
     // Start is called before the first frame update
     public GameObject target;
     private Vector3 newPos;
+
     void Start()
     {
         

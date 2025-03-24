@@ -20,8 +20,9 @@ public class PlayerMovement : MonoBehaviour
     public float minJumpForce = 10f; // Force for a small hop
     public Vector2 moveDirection = new Vector2(0, 1);
     public bool canJump;
+    public Animator animationControl;
 
-    public LayerMask groundLayer; 
+    public LayerMask groundLayer;
     public float groundCheckDistance = 2f;
     public RaycastHit terrainHit;
 
@@ -85,6 +86,8 @@ public class PlayerMovement : MonoBehaviour
             Flip();
             states = State.FaceLeft;
         }
+
+        animationControl.SetBool("Moving", moveDirection.x != 0);
     }
 
     public void OnJump(InputAction.CallbackContext context)
